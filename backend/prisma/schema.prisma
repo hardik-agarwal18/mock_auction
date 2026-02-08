@@ -1,0 +1,77 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  username  String   @unique
+  createdAt DateTime @default(now())
+
+  teams Team[]
+}
+
+model AuctionRoom {
+  id         String     @id @default(uuid())
+  name       String
+  hostId     String
+  status     RoomStatus @default(WAITING)
+  purse      Int
+  squadLimit Int
+  createdAt  DateTime   @default(now())
+
+  teams   Team[]
+  players RoomPlayer[]
+}
+
+model Team {
+  id     String @id @default(uuid())
+  roomId String
+  userId String
+  name   String
+  budget Int
+
+  room    AuctionRoom  @relation(fields: [roomId], references: [id])
+  user    User         @relation(fields: [userId], references: [id])
+  players TeamPlayer[]
+}
+
+model RoomPlayer {
+  id        String  @id @default(uuid())
+  roomId    String
+  name      String
+  role      String
+  basePrice Int
+  isSold    Boolean @default(false)
+
+  room        AuctionRoom  @relation(fields: [roomId], references: [id])
+  teamPlayers TeamPlayer[]
+}
+
+model TeamPlayer {
+  id       String @id @default(uuid())
+  teamId   String
+  playerId String
+  price    Int
+
+  team   Team       @relation(fields: [teamId], references: [id])
+  player RoomPlayer @relation(fields: [playerId], references: [id])
+}
+
+enum RoomStatus {
+  WAITING
+  LIVE
+  COMPLETED
+}
