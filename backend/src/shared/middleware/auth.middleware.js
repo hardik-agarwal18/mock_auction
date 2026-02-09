@@ -22,10 +22,23 @@ export const authenticate = (req, res, next) => {
 
     const decoded = jwt.verify(token, JWT_SECRET);
 
+    if (!decoded?.userId) {
+      throw new AppError("Invalid token payload", 401);
+    }
+
     req.user = { id: decoded.userId };
 
     next();
   } catch (err) {
+    // Handle JWT specific errors cleanly
+    if (err.name === "TokenExpiredError") {
+      return next(new AppError("Token expired", 401));
+    }
+
+    if (err.name === "JsonWebTokenError") {
+      return next(new AppError("Invalid token", 401));
+    }
+
     next(err);
   }
 };
