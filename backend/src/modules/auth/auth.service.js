@@ -2,7 +2,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import AppError from "../../shared/errors/AppError.js";
 import { JWT_SECRET } from "../../config/env.js";
-import { findUserByEmail, createUser } from "./auth.repo.js";
+import { findUserByEmail, createUser, findUserById } from "./auth.repo.js";
 
 export const registerUser = async ({ email, password, username }) => {
   const existing = await findUserByEmail(email);
@@ -36,4 +36,14 @@ export const loginUser = async ({ email, password }) => {
   const token = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: "1h" });
 
   return { token };
+};
+
+export const getCurrentUser = async (userId) => {
+  const user = await findUserById(userId);
+
+  if (!user) {
+    throw new AppError("User not found", 404);
+  }
+
+  return user;
 };
