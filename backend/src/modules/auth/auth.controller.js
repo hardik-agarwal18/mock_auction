@@ -1,19 +1,43 @@
-import { registerUser } from "./auth.service.js";
-import { loginUser } from "./auth.service.js";
+import { registerUser, loginUser, getCurrentUser } from "./auth.service.js";
 
-export const register = async (req, res) => {
+export const register = async (req, res, next) => {
   try {
     const user = await registerUser(req.body);
-    res.json(user);
+
+    res.status(201).json({
+      success: true,
+      message: "User registered successfully",
+    });
   } catch (err) {
-    res.status(400).json({ message: err.message });
+    next(err);
   }
 };
 
 export const login = async (req, res, next) => {
   try {
     const result = await loginUser(req.body);
-    res.json(result);
+
+    res.json({
+      success: true,
+      token: result.token,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const me = async (req, res, next) => {
+  try {
+    const user = await getCurrentUser(req.user.id);
+
+    res.json({
+      success: true,
+      user: {
+        id: user.id,
+        email: user.email,
+        username: user.username,
+      },
+    });
   } catch (err) {
     next(err);
   }
