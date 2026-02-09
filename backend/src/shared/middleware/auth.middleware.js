@@ -1,32 +1,31 @@
 import jwt from "jsonwebtoken";
 import { JWT_SECRET } from "../../config/env.js";
+import AppError from "../errors/AppError.js";
 
 export const authenticate = (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
 
     if (!authHeader) {
-      return res.status(401).json({ message: "Authorization header missing" });
+      throw new AppError("Authorization header missing", 401);
     }
 
-    const token = authHeader.startsWith("Bearer ")
-      ? authHeader.slice(7)
-      : authHeader;
+    if (!authHeader.startsWith("Bearer ")) {
+      throw new AppError("Invalid authorization format", 401);
+    }
+
+    const token = authHeader.split(" ")[1];
 
     if (!token) {
-      return res.status(401).json({ message: "Token missing" });
+      throw new AppError("Token missing", 401);
     }
 
     const decoded = jwt.verify(token, JWT_SECRET);
-    req.user = decoded;
+
+    req.user = { id: decoded.userId };
+
     next();
   } catch (err) {
-    if (err.name === "JsonWebTokenError") {
-      return res.status(401).json({ message: "Invalid token" });
-    }
-    if (err.name === "TokenExpiredError") {
-      return res.status(401).json({ message: "Token expired" });
-    }
-    return res.status(500).json({ message: "Authentication failed" });
+    next(err);
   }
 };
