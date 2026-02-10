@@ -61,6 +61,8 @@ model RoomPlayer {
   room        AuctionRoom  @relation(fields: [roomId], references: [id])
   teamPlayers TeamPlayer[]
 
+  createdAt DateTime @default(now())
+
   @@index([roomId])
 }
 
