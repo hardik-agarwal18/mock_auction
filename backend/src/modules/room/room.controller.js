@@ -25,3 +25,16 @@ export const joinRoom = async (req, res, next) => {
     next(err);
   }
 };
+
+export const getRoom = async (req, res, next) => {
+  try {
+    const room = await getRoomService(req.params.roomId);
+
+    res.json({
+      success: true,
+      room,
+    });
+  } catch (err) {
+    next(err);
+  }
+};

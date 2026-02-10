@@ -9,6 +9,19 @@ export const createRoom = (data) => {
 export const findRoomById = (id) => {
   return prisma.auctionRoom.findUnique({
     where: { id },
+    include: {
+      teams: {
+        include: {
+          user: {
+            select: {
+              id: true,
+              email: true,
+              username: true,
+            },
+          },
+        },
+      },
+    },
   });
 };
 

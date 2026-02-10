@@ -48,3 +48,13 @@ export const joinRoomService = async (userId, roomId) => {
 
   return team;
 };
+
+export const getRoomService = async (roomId) => {
+  const room = await findRoomById(roomId);
+
+  if (!room) {
+    throw new AppError("Room not found", 404);
+  }
+
+  return room;
+};
