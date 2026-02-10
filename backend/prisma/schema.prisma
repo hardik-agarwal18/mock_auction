@@ -49,15 +49,19 @@ model Team {
 }
 
 model RoomPlayer {
-  id        String  @id @default(uuid())
-  roomId    String
-  name      String
-  role      String
-  basePrice Int
-  isSold    Boolean @default(false)
+  id           String       @id @default(uuid())
+  roomId       String
+  name         String
+  role         String
+  basePrice    Int
+  status       PlayerStatus @default(UPCOMING)
+  soldPrice    Int?
+  soldToTeamId String?
 
   room        AuctionRoom  @relation(fields: [roomId], references: [id])
   teamPlayers TeamPlayer[]
+
+  @@index([roomId])
 }
 
 model TeamPlayer {
@@ -74,4 +78,11 @@ enum RoomStatus {
   WAITING
   LIVE
   COMPLETED
+}
+
+enum PlayerStatus {
+  UPCOMING
+  ACTIVE
+  SOLD
+  UNSOLD
 }
