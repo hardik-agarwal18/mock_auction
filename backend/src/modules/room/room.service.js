@@ -4,6 +4,7 @@ import {
   findRoomById,
   findTeamInRoom,
   createTeam,
+  updateRoomStatus,
 } from "./room.repo.js";
 
 export const createRoomService = async (userId, data) => {
@@ -57,4 +58,22 @@ export const getRoomService = async (roomId) => {
   }
 
   return room;
+};
+
+export const startRoomService = async (userId, roomId) => {
+  const room = await findRoomById(roomId);
+
+  if (!room) {
+    throw new AppError("Room not found", 404);
+  }
+
+  if (room.hostId !== userId) {
+    throw new AppError("Only host can start the auction", 403);
+  }
+
+  if (room.status !== "WAITING") {
+    throw new AppError("Room already started", 400);
+  }
+
+  return updateRoomStatus(roomId, "LIVE");
 };

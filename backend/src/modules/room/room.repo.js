@@ -36,3 +36,10 @@ export const createTeam = (data) => {
     data,
   });
 };
+
+export const updateRoomStatus = (roomId, status) => {
+  return prisma.auctionRoom.update({
+    where: { id: roomId },
+    data: { status },
+  });
+};
