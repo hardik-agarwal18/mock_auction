@@ -1,4 +1,8 @@
-import { createRoomService, joinRoomService } from "./room.service.js";
+import {
+  createRoomService,
+  joinRoomService,
+  startRoomService,
+} from "./room.service.js";
 
 export const createRoom = async (req, res, next) => {
   try {
@@ -29,6 +33,19 @@ export const joinRoom = async (req, res, next) => {
 export const getRoom = async (req, res, next) => {
   try {
     const room = await getRoomService(req.params.roomId);
+
+    res.json({
+      success: true,
+      room,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const startRoom = async (req, res, next) => {
+  try {
+    const room = await startRoomService(req.user.id, req.params.roomId);
 
     res.json({
       success: true,
