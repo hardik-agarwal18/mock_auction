@@ -1,7 +1,6 @@
-import { findPlayersByRoom } from "./player.repo";
+import { findPlayersByRoom, createPlayer } from "./player.repo.js";
 import { findRoomById } from "../room/room.repo.js";
-import { createPlayer } from "./player.repo.js";
-import AppError from "../../shared/errors/appError.js";
+import AppError from "../../shared/errors/AppError.js";
 
 export const addPlayerService = async (userId, roomId, data) => {
   const room = await findRoomById(roomId);
