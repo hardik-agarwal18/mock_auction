@@ -10,6 +10,7 @@ import {
   updateRoom,
   findTeamById,
   updateTeam,
+  findTeamInRoom,
 } from "../room/room.repo.js";
 import { auctionState } from "./auction.state.js";
 
