@@ -59,11 +59,11 @@ JWT_SECRET="your-secret-key-here-change-in-production"
 
 **Environment Variables:**
 
-| Variable | Description | Example |
-|----------|-------------|---------|
-| `PORT` | Server port | `3000` |
+| Variable       | Description                  | Example                                        |
+| -------------- | ---------------------------- | ---------------------------------------------- |
+| `PORT`         | Server port                  | `3000`                                         |
 | `DATABASE_URL` | PostgreSQL connection string | `postgresql://user:pass@localhost:5432/dbname` |
-| `JWT_SECRET` | Secret key for JWT signing | `your-secret-key` |
+| `JWT_SECRET`   | Secret key for JWT signing   | `your-secret-key`                              |
 
 ### 4. Set up the database
 
@@ -95,6 +95,7 @@ The server will start on `http://localhost:3000`
 ### Models
 
 #### User
+
 - `id`: UUID (Primary Key)
 - `email`: String (Unique)
 - `password`: String (Hashed)
@@ -102,6 +103,7 @@ The server will start on `http://localhost:3000`
 - `createdAt`: DateTime
 
 #### AuctionRoom
+
 - `id`: UUID (Primary Key)
 - `name`: String
 - `hostId`: String
@@ -112,6 +114,7 @@ The server will start on `http://localhost:3000`
 - `createdAt`: DateTime
 
 #### Team
+
 - `id`: UUID (Primary Key)
 - `roomId`: String (Foreign Key)
 - `userId`: String (Foreign Key)
@@ -119,6 +122,7 @@ The server will start on `http://localhost:3000`
 - `budget`: Integer (Remaining budget)
 
 #### RoomPlayer
+
 - `id`: UUID (Primary Key)
 - `roomId`: String (Foreign Key)
 - `name`: String
@@ -129,6 +133,7 @@ The server will start on `http://localhost:3000`
 - `soldToTeamId`: String (Nullable)
 
 #### TeamPlayer
+
 - `id`: UUID (Primary Key)
 - `teamId`: String (Foreign Key)
 - `playerId`: String (Foreign Key)
@@ -139,6 +144,7 @@ The server will start on `http://localhost:3000`
 ### Authentication Endpoints
 
 #### Register User
+
 ```http
 POST /api/auth/register
 Content-Type: application/json
@@ -151,6 +157,7 @@ Content-Type: application/json
 ```
 
 **Response:**
+
 ```json
 {
   "id": "uuid",
@@ -160,6 +167,7 @@ Content-Type: application/json
 ```
 
 #### Login
+
 ```http
 POST /api/auth/login
 Content-Type: application/json
@@ -171,6 +179,7 @@ Content-Type: application/json
 ```
 
 **Response:**
+
 ```json
 {
   "token": "jwt-token",
@@ -183,12 +192,14 @@ Content-Type: application/json
 ```
 
 #### Get Current User
+
 ```http
 GET /api/auth/me
 Authorization: Bearer <token>
 ```
 
 **Response:**
+
 ```json
 {
   "id": "uuid",
@@ -200,6 +211,7 @@ Authorization: Bearer <token>
 ### Room Endpoints
 
 #### Create Auction Room
+
 ```http
 POST /api/rooms
 Authorization: Bearer <token>
@@ -213,6 +225,7 @@ Content-Type: application/json
 ```
 
 **Response:**
+
 ```json
 {
   "id": "room-uuid",
@@ -226,6 +239,7 @@ Content-Type: application/json
 ```
 
 #### Join Room
+
 ```http
 POST /api/rooms/:roomId/join
 Authorization: Bearer <token>
@@ -237,12 +251,14 @@ Content-Type: application/json
 ```
 
 #### Get Room Details
+
 ```http
 GET /api/rooms/:roomId
 Authorization: Bearer <token>
 ```
 
 **Response:**
+
 ```json
 {
   "id": "room-uuid",
@@ -264,6 +280,7 @@ Authorization: Bearer <token>
 ```
 
 #### Start Auction
+
 ```http
 PATCH /api/rooms/:roomId/start
 Authorization: Bearer <token>
@@ -272,6 +289,7 @@ Authorization: Bearer <token>
 ### Player Endpoints
 
 #### Add Player to Room
+
 ```http
 POST /api/players/:roomId
 Authorization: Bearer <token>
@@ -285,6 +303,7 @@ Content-Type: application/json
 ```
 
 **Response:**
+
 ```json
 {
   "id": "player-uuid",
@@ -297,12 +316,14 @@ Content-Type: application/json
 ```
 
 #### Get All Players in Room
+
 ```http
 GET /api/players/:roomId
 Authorization: Bearer <token>
 ```
 
 **Response:**
+
 ```json
 {
   "players": [
@@ -320,6 +341,7 @@ Authorization: Bearer <token>
 ### Auction Endpoints
 
 #### Place Bid
+
 ```http
 POST /api/auction/:roomId/bid
 Authorization: Bearer <token>
@@ -332,6 +354,7 @@ Content-Type: application/json
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -392,11 +415,11 @@ backend/
 
 ## 📜 Available Scripts
 
-| Script | Command | Description |
-|--------|---------|-------------|
-| `start` | `npm start` | Start the server in production mode |
-| `dev` | `npm run dev` | Start the server in development mode with auto-reload |
-| `test` | `npm test` | Run tests (not configured yet) |
+| Script  | Command       | Description                                           |
+| ------- | ------------- | ----------------------------------------------------- |
+| `start` | `npm start`   | Start the server in production mode                   |
+| `dev`   | `npm run dev` | Start the server in development mode with auto-reload |
+| `test`  | `npm test`    | Run tests (not configured yet)                        |
 
 ## 🎮 Usage Guide
 
