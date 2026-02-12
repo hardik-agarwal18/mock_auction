@@ -4,8 +4,12 @@ import {
   findRoomById,
   findTeamInRoom,
   createTeam,
-  updateRoomStatus,
+  updateRoom,
 } from "./room.repo.js";
+import {
+  findFirstUpcomingPlayer,
+  updatePlayerStatus,
+} from "../player/player.repo.js";
 
 export const createRoomService = async (userId, data) => {
   const room = await createRoom({
@@ -75,5 +79,20 @@ export const startRoomService = async (userId, roomId) => {
     throw new AppError("Room already started", 400);
   }
 
-  return updateRoomStatus(roomId, "LIVE");
+  const firstPlayer = await findFirstUpcomingPlayer(roomId);
+
+  if (!firstPlayer) {
+    throw new AppError("No players available to start auction", 400);
+  }
+
+  // Activate first player
+  await updatePlayerStatus(firstPlayer.id, "ACTIVE");
+
+  // Update room
+  const updatedRoom = await updateRoom(roomId, {
+    status: "LIVE",
+    currentPlayerId: firstPlayer.id,
+  });
+
+  return updatedRoom;
 };
