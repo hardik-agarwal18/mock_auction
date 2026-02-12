@@ -43,3 +43,26 @@ export const updatePlayerStatus = (playerId, status) => {
     data: { status },
   });
 };
+
+export const updatePlayer = (playerId, data) => {
+  return prisma.roomPlayer.update({
+    where: { id: playerId },
+    data,
+  });
+};
+
+export const findNextUpcomingPlayer = (roomId) => {
+  return prisma.roomPlayer.findFirst({
+    where: {
+      roomId,
+      status: "UPCOMING",
+    },
+    orderBy: { createdAt: "asc" },
+  });
+};
+
+export const createTeamPlayer = (data) => {
+  return prisma.teamPlayer.create({
+    data,
+  });
+};
