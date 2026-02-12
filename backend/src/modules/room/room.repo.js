@@ -43,3 +43,16 @@ export const updateRoom = (roomId, data) => {
     data,
   });
 };
+
+export const updateTeam = (teamId, data) => {
+  return prisma.team.update({
+    where: { id: teamId },
+    data,
+  });
+};
+
+export const findTeamById = (teamId) => {
+  return prisma.team.findUnique({
+    where: { id: teamId },
+  });
+};
