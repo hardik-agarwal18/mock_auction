@@ -37,9 +37,9 @@ export const createTeam = (data) => {
   });
 };
 
-export const updateRoomStatus = (roomId, status) => {
+export const updateRoom = (roomId, data) => {
   return prisma.auctionRoom.update({
     where: { id: roomId },
-    data: { status },
+    data,
   });
 };
