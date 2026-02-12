@@ -52,26 +52,40 @@ export const placeBidService = async (userId, roomId, amount) => {
     throw new AppError("Auction state not initialized", 500);
   }
 
-  // Determine current price correctly
-  const currentPrice =
-    currentState.highestBid === 0 ? player.basePrice : currentState.highestBid;
+  // Prevent same team from bidding consecutively
+  if (currentState.highestBidder === team.id) {
+    throw new AppError("You are already the highest bidder", 400);
+  }
+
+  let currentPrice = currentState.highestBid;
+
+  if (currentPrice === 0) {
+    currentPrice = player.basePrice;
+  }
 
   const minIncrement = getMinimumIncrement(currentPrice);
 
-  if (amount < currentPrice + minIncrement) {
-    throw new AppError(
-      `Bid must be at least ${minIncrement} higher than current price`,
-      400,
-    );
+  // If first bid, allow basePrice
+  if (currentState.highestBid === 0) {
+    if (amount < player.basePrice) {
+      throw new AppError("Bid must be at least base price", 400);
+    }
+  } else {
+    if (amount < currentPrice + minIncrement) {
+      throw new AppError(
+        `Bid must be at least ${minIncrement} higher than current price`,
+        400,
+      );
+    }
   }
 
-  // Prevent same team from bidding same amount again
-  if (
-    currentState.highestBidder === team.id &&
-    currentState.highestBid === amount
-  ) {
-    throw new AppError("You already placed this bid", 400);
-  }
+  // // Prevent same team from bidding same amount again
+  // if (
+  //   currentState.highestBidder === team.id &&
+  //   currentState.highestBid === amount
+  // ) {
+  //   throw new AppError("You already placed this bid", 400);
+  // }
 
   // Update in-memory state
   auctionState[roomId] = {
