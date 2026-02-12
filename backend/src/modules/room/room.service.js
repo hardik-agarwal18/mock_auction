@@ -10,6 +10,7 @@ import {
   findFirstUpcomingPlayer,
   updatePlayerStatus,
 } from "../player/player.repo.js";
+import { auctionState } from "../auction/auction.state.js";
 
 export const createRoomService = async (userId, data) => {
   const room = await createRoom({
@@ -93,6 +94,11 @@ export const startRoomService = async (userId, roomId) => {
     status: "LIVE",
     currentPlayerId: firstPlayer.id,
   });
+
+  auctionState[roomId] = {
+    highestBid: 0,
+    highestBidder: null,
+  };
 
   return updatedRoom;
 };
