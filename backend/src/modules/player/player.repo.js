@@ -1,32 +1,32 @@
 import prisma from "../../config/database.js";
 
-export const createPlayer = (data) => {
-  return prisma.roomPlayer.create({
+export const createPlayer = (data, tx) => {
+  return (tx || prisma).roomPlayer.create({
     data,
   });
 };
 
-export const findPlayersByRoom = (roomId) => {
-  return prisma.roomPlayer.findMany({
+export const findPlayersByRoom = (roomId, tx) => {
+  return (tx || prisma).roomPlayer.findMany({
     where: { roomId },
     orderBy: { createdAt: "asc" },
   });
 };
 
-export const findPlayerById = (id) => {
-  return prisma.roomPlayer.findUnique({
+export const findPlayerById = (id, tx) => {
+  return (tx || prisma).roomPlayer.findUnique({
     where: { id },
   });
 };
 
-export const createManyPlayers = (data) => {
-  return prisma.roomPlayer.createMany({
+export const createManyPlayers = (data, tx) => {
+  return (tx || prisma).roomPlayer.createMany({
     data,
   });
 };
 
-export const findFirstUpcomingPlayer = (roomId) => {
-  return prisma.roomPlayer.findFirst({
+export const findFirstUpcomingPlayer = (roomId, tx) => {
+  return (tx || prisma).roomPlayer.findFirst({
     where: {
       roomId,
       status: "UPCOMING",
@@ -37,22 +37,22 @@ export const findFirstUpcomingPlayer = (roomId) => {
   });
 };
 
-export const updatePlayerStatus = (playerId, status) => {
-  return prisma.roomPlayer.update({
+export const updatePlayerStatus = (playerId, status, tx) => {
+  return (tx || prisma).roomPlayer.update({
     where: { id: playerId },
     data: { status },
   });
 };
 
-export const updatePlayer = (playerId, data) => {
-  return prisma.roomPlayer.update({
+export const updatePlayer = (playerId, data, tx) => {
+  return (tx || prisma).roomPlayer.update({
     where: { id: playerId },
     data,
   });
 };
 
-export const findNextUpcomingPlayer = (roomId) => {
-  return prisma.roomPlayer.findFirst({
+export const findNextUpcomingPlayer = (roomId, tx) => {
+  return (tx || prisma).roomPlayer.findFirst({
     where: {
       roomId,
       status: "UPCOMING",
@@ -61,8 +61,8 @@ export const findNextUpcomingPlayer = (roomId) => {
   });
 };
 
-export const createTeamPlayer = (data) => {
-  return prisma.teamPlayer.create({
+export const createTeamPlayer = (data, tx) => {
+  return (tx || prisma).teamPlayer.create({
     data,
   });
 };
