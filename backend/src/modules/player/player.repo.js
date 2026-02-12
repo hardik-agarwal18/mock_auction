@@ -66,3 +66,9 @@ export const createTeamPlayer = (data, tx) => {
     data,
   });
 };
+
+export const countPlayersByTeam = (teamId, tx) => {
+  return (tx || prisma).teamPlayer.count({
+    where: { teamId },
+  });
+};
