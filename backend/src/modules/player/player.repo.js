@@ -24,3 +24,22 @@ export const createManyPlayers = (data) => {
     data,
   });
 };
+
+export const findFirstUpcomingPlayer = (roomId) => {
+  return prisma.roomPlayer.findFirst({
+    where: {
+      roomId,
+      status: "UPCOMING",
+    },
+    orderBy: {
+      createdAt: "asc",
+    },
+  });
+};
+
+export const updatePlayerStatus = (playerId, status) => {
+  return prisma.roomPlayer.update({
+    where: { id: playerId },
+    data: { status },
+  });
+};
