@@ -13,6 +13,7 @@ import {
   findTeamInRoom,
 } from "../room/room.repo.js";
 import { auctionState } from "./auction.state.js";
+import { getMinimumIncrement } from "./priceLadder.js";
 
 export const placeBidService = async (userId, roomId, amount) => {
   const room = await findRoomById(roomId);
@@ -51,14 +52,25 @@ export const placeBidService = async (userId, roomId, amount) => {
     throw new AppError("Auction state not initialized", 500);
   }
 
-  if (currentState.highestBid === 0) {
-    if (amount < player.basePrice) {
-      throw new AppError("Bid must be >= base price", 400);
-    }
-  } else {
-    if (amount <= currentState.highestBid) {
-      throw new AppError("Bid must be higher than current bid", 400);
-    }
+  // Determine current price correctly
+  const currentPrice =
+    currentState.highestBid === 0 ? player.basePrice : currentState.highestBid;
+
+  const minIncrement = getMinimumIncrement(currentPrice);
+
+  if (amount < currentPrice + minIncrement) {
+    throw new AppError(
+      `Bid must be at least ${minIncrement} higher than current price`,
+      400,
+    );
+  }
+
+  // Prevent same team from bidding same amount again
+  if (
+    currentState.highestBidder === team.id &&
+    currentState.highestBid === amount
+  ) {
+    throw new AppError("You already placed this bid", 400);
   }
 
   // Update in-memory state
@@ -67,7 +79,10 @@ export const placeBidService = async (userId, roomId, amount) => {
     highestBidder: team.id,
   };
 
-  return auctionState[roomId];
+  return {
+    highestBid: amount,
+    highestBidder: team.id,
+  };
 };
 
 export const closeCurrentPlayerService = async (userId, roomId) => {
