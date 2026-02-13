@@ -39,9 +39,7 @@ const Auction = () => {
       setTeams(roomData.teams);
 
       // Find current user's team
-      const userTeam = roomData.teams.find(
-        (team) => team.userId === user.id,
-      );
+      const userTeam = roomData.teams.find((team) => team.userId === user.id);
       setMyTeam(userTeam);
 
       // Set current player and bid info
