@@ -11,6 +11,7 @@ import {
   updatePlayerStatus,
 } from "../player/player.repo.js";
 import { auctionState } from "../auction/auction.state.js";
+import { startTimer } from "../auction/timer.engine.js";
 
 export const createRoomService = async (userId, data) => {
   const room = await createRoom({
@@ -89,16 +90,20 @@ export const startRoomService = async (userId, roomId) => {
   // Activate first player
   await updatePlayerStatus(firstPlayer.id, "ACTIVE");
 
+  auctionState[roomId] = {
+    highestBid: 0,
+    highestBidder: null,
+    timer: null,
+    timeoutAt: null,
+  };
+
   // Update room
   const updatedRoom = await updateRoom(roomId, {
     status: "LIVE",
     currentPlayerId: firstPlayer.id,
   });
 
-  auctionState[roomId] = {
-    highestBid: 0,
-    highestBidder: null,
-  };
+  startTimer(roomId, userId);
 
   return updatedRoom;
 };
