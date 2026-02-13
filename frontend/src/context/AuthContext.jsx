@@ -20,8 +20,19 @@ export const AuthProvider = ({ children }) => {
       const token = localStorage.getItem("token");
       const savedUser = localStorage.getItem("user");
 
-      if (token && savedUser) {
-        setUser(JSON.parse(savedUser));
+      if (
+        token &&
+        savedUser &&
+        savedUser !== "undefined" &&
+        savedUser !== "null"
+      ) {
+        try {
+          setUser(JSON.parse(savedUser));
+        } catch (error) {
+          console.error("Failed to parse user data:", error);
+          localStorage.removeItem("user");
+          localStorage.removeItem("token");
+        }
       }
       setLoading(false);
     };
@@ -30,23 +41,75 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = async (email, password) => {
-    const response = await axios.post("/auth/login", { email, password });
-    localStorage.setItem("token", response.data.token);
-    localStorage.setItem("user", JSON.stringify(response.data.user));
-    setUser(response.data.user);
-    return response.data;
+    try {
+      const response = await axios.post("/auth/login", { email, password });
+
+      if (!response.data.token) {
+        throw new Error("No token received from server");
+      }
+
+      localStorage.setItem("token", response.data.token);
+
+      // Fetch user data after login
+      const userResponse = await axios.get("/auth/me");
+
+      if (!userResponse.data.user) {
+        throw new Error("Failed to fetch user data");
+      }
+
+      const userData = userResponse.data.user;
+      localStorage.setItem("user", JSON.stringify(userData));
+      setUser(userData);
+
+      return response.data;
+    } catch (error) {
+      // Clean up on error
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      setUser(null);
+      throw error;
+    }
   };
 
   const register = async (email, password, username) => {
-    const response = await axios.post("/auth/register", {
-      email,
-      password,
-      username,
-    });
-    localStorage.setItem("token", response.data.token);
-    localStorage.setItem("user", JSON.stringify(response.data.user));
-    setUser(response.data.user);
-    return response.data;
+    try {
+      await axios.post("/auth/register", {
+        email,
+        password,
+        username,
+      });
+
+      // Auto login after registration
+      const loginResponse = await axios.post("/auth/login", {
+        email,
+        password,
+      });
+
+      if (!loginResponse.data.token) {
+        throw new Error("No token received from server");
+      }
+
+      localStorage.setItem("token", loginResponse.data.token);
+
+      // Fetch user data
+      const userResponse = await axios.get("/auth/me");
+
+      if (!userResponse.data.user) {
+        throw new Error("Failed to fetch user data");
+      }
+
+      const userData = userResponse.data.user;
+      localStorage.setItem("user", JSON.stringify(userData));
+      setUser(userData);
+
+      return loginResponse.data;
+    } catch (error) {
+      // Clean up on error
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      setUser(null);
+      throw error;
+    }
   };
 
   const logout = () => {
