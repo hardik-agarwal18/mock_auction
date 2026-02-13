@@ -14,13 +14,13 @@ import { findPlayerById } from "../player/player.repo.js";
    ROOM OVERVIEW ANALYTICS
 ========================================= */
 export const getRoomAnalyticsService = async (roomId) => {
-  const totalBids = await countBidsByRoom(roomId);
-
-  const highestBid = await findHighestBidInRoom(roomId);
-
-  const mostExpensivePlayer = await findMostExpensivePlayer(roomId);
-
-  const totalAuctionValue = await getTotalAuctionValue(roomId);
+  const [totalBids, highestBid, mostExpensivePlayer, totalAuctionValue] =
+    await Promise.all([
+      countBidsByRoom(roomId),
+      findHighestBidInRoom(roomId),
+      findMostExpensivePlayer(roomId),
+      getTotalAuctionValue(roomId),
+    ]);
 
   return {
     totalBids,
