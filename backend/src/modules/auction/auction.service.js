@@ -16,6 +16,7 @@ import { auctionState } from "./auction.state.js";
 import { getMinimumIncrement } from "./priceLadder.js";
 import { startTimer } from "./timer.engine.js";
 import prisma from "../../config/database.js";
+import { io } from "../../server.js";
 
 export const placeBidService = async (userId, roomId, amount) => {
   const room = await findRoomById(roomId);
@@ -92,6 +93,11 @@ export const placeBidService = async (userId, roomId, amount) => {
   // Update in-memory state
   state.highestBid = amount;
   state.highestBidder = team.id;
+
+  io.to(roomId).emit("newBid", {
+    highestBid: amount,
+    highestBidder: team.id,
+  });
 
   // Restart timer
   startTimer(roomId, room.hostId);
@@ -182,6 +188,10 @@ export const closeCurrentPlayerService = async (userId, roomId) => {
       await updatePlayer(nextPlayer.id, { status: "ACTIVE" }, tx);
 
       await updateRoom(roomId, { currentPlayerId: nextPlayer.id }, tx);
+
+      io.to(roomId).emit("nextPlayer", {
+        playerId: nextPlayer.id,
+      });
 
       state.highestBid = 0;
       state.highestBidder = null;
