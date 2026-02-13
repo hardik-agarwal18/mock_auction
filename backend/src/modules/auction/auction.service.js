@@ -91,8 +91,8 @@ export const placeBidService = async (userId, roomId, amount) => {
   // }
 
   // Update in-memory state
-  state.highestBid = amount;
-  state.highestBidder = team.id;
+  currentState.highestBid = amount;
+  currentState.highestBidder = team.id;
 
   io.to(roomId).emit("newBid", {
     highestBid: amount,
