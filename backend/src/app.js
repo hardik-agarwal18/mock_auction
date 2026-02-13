@@ -4,6 +4,7 @@ import authRoutes from "./modules/auth/auth.routes.js";
 import roomRoutes from "./modules/room/room.routes.js";
 import playerRoutes from "./modules/player/player.routes.js";
 import auctionRoutes from "./modules/auction/auction.routes.js";
+import bidRoutes from "./modules/bid/bid.routes.js";
 import errorMiddleware from "./shared/middleware/error.middleware.js";
 
 const app = express();
@@ -15,6 +16,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/rooms", roomRoutes);
 app.use("/api/players", playerRoutes);
 app.use("/api/auction", auctionRoutes);
+app.use("/api/analytics", bidRoutes);
 
 app.get("/", (req, res) => {
   res.send("Hello World!");
