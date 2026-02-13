@@ -11,8 +11,8 @@ export const recoverLiveAuctions = async () => {
     if (!room.currentPlayerId) continue;
 
     auctionState[room.id] = {
-      highestBid: 0, // we don't persist this yet
-      highestBidder: null,
+      highestBid: room.currentHighestBid || 0,
+      highestBidder: room.currentHighestBidder || null,
       timer: null,
       interval: null,
       timeoutAt: null,

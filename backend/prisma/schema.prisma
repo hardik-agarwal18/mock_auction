@@ -24,14 +24,16 @@ model User {
 }
 
 model AuctionRoom {
-  id              String     @id @default(uuid())
-  name            String
-  hostId          String
-  status          RoomStatus @default(WAITING)
-  purse           Int
-  squadLimit      Int
-  currentPlayerId String?
-  createdAt       DateTime   @default(now())
+  id                   String     @id @default(uuid())
+  name                 String
+  hostId               String
+  status               RoomStatus @default(WAITING)
+  purse                Int
+  squadLimit           Int
+  currentPlayerId      String?
+  currentHighestBid    Int?
+  currentHighestBidder String?
+  createdAt            DateTime   @default(now())
 
   teams   Team[]
   players RoomPlayer[]

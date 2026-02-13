@@ -94,6 +94,11 @@ export const placeBidService = async (userId, roomId, amount) => {
   currentState.highestBid = amount;
   currentState.highestBidder = team.id;
 
+  await updateRoom(roomId, {
+    currentHighestBid: amount,
+    currentHighestBidder: team.id,
+  });
+
   io.to(roomId).emit("newBid", {
     highestBid: amount,
     highestBidder: team.id,
@@ -187,7 +192,15 @@ export const closeCurrentPlayerService = async (userId, roomId) => {
     if (nextPlayer) {
       await updatePlayer(nextPlayer.id, { status: "ACTIVE" }, tx);
 
-      await updateRoom(roomId, { currentPlayerId: nextPlayer.id }, tx);
+      await updateRoom(
+        roomId,
+        {
+          currentPlayerId: nextPlayer.id,
+          currentHighestBid: null,
+          currentHighestBidder: null,
+        },
+        tx,
+      );
 
       io.to(roomId).emit("nextPlayer", {
         playerId: nextPlayer.id,
@@ -210,6 +223,8 @@ export const closeCurrentPlayerService = async (userId, roomId) => {
       {
         status: "COMPLETED",
         currentPlayerId: null,
+        currentHighestBid: null,
+        currentHighestBidder: null,
       },
       tx,
     );
