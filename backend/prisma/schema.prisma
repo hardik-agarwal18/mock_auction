@@ -37,6 +37,7 @@ model AuctionRoom {
 
   teams   Team[]
   players RoomPlayer[]
+  bids    Bid[]
 }
 
 model Team {
@@ -49,6 +50,7 @@ model Team {
   room    AuctionRoom  @relation(fields: [roomId], references: [id])
   user    User         @relation(fields: [userId], references: [id])
   players TeamPlayer[]
+  bids    Bid[]
 }
 
 model RoomPlayer {
@@ -65,6 +67,7 @@ model RoomPlayer {
   teamPlayers TeamPlayer[]
 
   createdAt DateTime @default(now())
+  bids      Bid[]
 
   @@index([roomId])
 }
@@ -90,4 +93,21 @@ enum PlayerStatus {
   ACTIVE
   SOLD
   UNSOLD
+}
+
+model Bid {
+  id        String   @id @default(uuid())
+  roomId    String
+  playerId  String
+  teamId    String
+  amount    Int
+  createdAt DateTime @default(now())
+
+  room   AuctionRoom @relation(fields: [roomId], references: [id])
+  player RoomPlayer  @relation(fields: [playerId], references: [id])
+  team   Team        @relation(fields: [teamId], references: [id])
+
+  @@index([roomId])
+  @@index([teamId])
+  @@index([playerId])
 }
