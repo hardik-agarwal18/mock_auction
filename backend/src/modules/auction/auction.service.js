@@ -14,6 +14,7 @@ import {
 } from "../room/room.repo.js";
 import { auctionState } from "./auction.state.js";
 import { getMinimumIncrement } from "./priceLadder.js";
+import prisma from "../../config/database.js";
 
 export const placeBidService = async (userId, roomId, amount) => {
   const room = await findRoomById(roomId);
@@ -118,92 +119,90 @@ export const closeCurrentPlayerService = async (userId, roomId) => {
     throw new AppError("No active player", 400);
   }
 
-  const player = await findPlayerById(room.currentPlayerId);
-
-  if (!player || player.status !== "ACTIVE") {
-    throw new AppError("Player not active", 400);
-  }
-
   const state = auctionState[roomId];
 
   if (!state) {
     throw new AppError("Auction state missing", 500);
   }
 
-  // ======================
-  // CASE 1: NO BIDS
-  // ======================
-  if (state.highestBid === 0) {
-    await updatePlayer(player.id, {
-      status: "UNSOLD",
-    });
-  }
-  // ======================
-  // CASE 2: SOLD
-  // ======================
-  else {
-    const team = await findTeamById(state.highestBidder);
+  return prisma.$transaction(async (tx) => {
+    const player = await findPlayerById(room.currentPlayerId, tx);
 
-    if (!team) {
-      throw new AppError("Winning team not found", 500);
+    if (!player || player.status !== "ACTIVE") {
+      throw new AppError("Player not active", 400);
     }
 
-    // Update player
-    await updatePlayer(player.id, {
-      status: "SOLD",
-      soldPrice: state.highestBid,
-      soldToTeamId: team.id,
-    });
+    // ======================
+    // NO BIDS
+    // ======================
+    if (state.highestBid === 0) {
+      await updatePlayer(player.id, { status: "UNSOLD" }, tx);
+    }
+    // ======================
+    // SOLD
+    // ======================
+    else {
+      const team = await findTeamById(state.highestBidder, tx);
 
-    // Deduct budget
-    await updateTeam(team.id, {
-      budget: team.budget - state.highestBid,
-    });
+      if (!team) throw new AppError("Winning team not found", 500);
 
-    // Create purchase record
-    await createTeamPlayer({
-      teamId: team.id,
-      playerId: player.id,
-      price: state.highestBid,
-    });
-  }
+      await updatePlayer(
+        player.id,
+        {
+          status: "SOLD",
+          soldPrice: state.highestBid,
+          soldToTeamId: team.id,
+        },
+        tx,
+      );
 
-  // ======================
-  // MOVE TO NEXT PLAYER
-  // ======================
-  const nextPlayer = await findNextUpcomingPlayer(roomId);
+      await updateTeam(
+        team.id,
+        {
+          budget: team.budget - state.highestBid,
+        },
+        tx,
+      );
 
-  if (nextPlayer) {
-    await updatePlayer(nextPlayer.id, {
-      status: "ACTIVE",
-    });
+      await createTeamPlayer(
+        {
+          teamId: team.id,
+          playerId: player.id,
+          price: state.highestBid,
+        },
+        tx,
+      );
+    }
 
-    await updateRoom(roomId, {
-      currentPlayerId: nextPlayer.id,
-    });
+    const nextPlayer = await findNextUpcomingPlayer(roomId, tx);
 
-    auctionState[roomId] = {
-      highestBid: 0,
-      highestBidder: null,
-    };
+    if (nextPlayer) {
+      await updatePlayer(nextPlayer.id, { status: "ACTIVE" }, tx);
 
-    return {
-      message: "Moved to next player",
-      nextPlayerId: nextPlayer.id,
-    };
-  }
+      await updateRoom(roomId, { currentPlayerId: nextPlayer.id }, tx);
 
-  // ======================
-  // AUCTION COMPLETED
-  // ======================
-  await updateRoom(roomId, {
-    status: "COMPLETED",
-    currentPlayerId: null,
+      auctionState[roomId] = {
+        highestBid: 0,
+        highestBidder: null,
+      };
+
+      return {
+        message: "Moved to next player",
+        nextPlayerId: nextPlayer.id,
+      };
+    }
+
+    await updateRoom(
+      roomId,
+      {
+        status: "COMPLETED",
+        currentPlayerId: null,
+      },
+      tx,
+    );
+
+    delete auctionState[roomId];
+
+    return { message: "Auction completed" };
   });
-
-  delete auctionState[roomId];
-
-  return {
-    message: "Auction completed",
-  };
 };
