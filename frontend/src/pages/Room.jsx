@@ -5,6 +5,7 @@ import { useToast } from "../components/Toast";
 import axios from "../lib/axios";
 import Navbar from "../components/Navbar";
 import LoadingSpinner from "../components/LoadingSpinner";
+import PlayerCard from "../components/PlayerCard";
 import { Copy, Users, Wallet, Trophy, User } from "lucide-react";
 
 const Room = () => {
@@ -241,36 +242,14 @@ const Room = () => {
               )}
             </div>
           ) : (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {players.map((player, index) => (
                 <div
                   key={player.id}
-                  className="bg-gradient-to-br from-gray-700/50 to-gray-800/50 border border-gray-600/50 rounded-xl p-5 hover-lift card-hover animate-slideUp"
+                  className="animate-slideUp"
                   style={{ animationDelay: `${index * 0.05}s` }}
                 >
-                  <h4 className="text-white font-bold text-lg mb-2">
-                    {player.name}
-                  </h4>
-                  <p className="text-gray-400 text-sm mb-3">{player.role}</p>
-                  <div className="flex justify-between items-center mb-3">
-                    <span className="text-sm text-gray-400">Base Price:</span>
-                    <span className="text-white font-semibold">
-                      ₹{player.basePrice} Cr
-                    </span>
-                  </div>
-                  <div>
-                    <span
-                      className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                        player.status === "SOLD"
-                          ? "bg-green-500/20 text-green-400 border border-green-500/30"
-                          : player.status === "UNSOLD"
-                            ? "bg-red-500/20 text-red-400 border border-red-500/30"
-                            : "bg-blue-500/20 text-blue-400 border border-blue-500/30"
-                      }`}
-                    >
-                      {player.status}
-                    </span>
-                  </div>
+                  <PlayerCard player={player} showPrice={true} />
                 </div>
               ))}
             </div>

@@ -14,6 +14,7 @@ import {
   Gavel,
   TrendingUp,
   ArrowLeft,
+  User as UserIcon,
 } from "lucide-react";
 
 const Auction = () => {
@@ -138,6 +139,35 @@ const Auction = () => {
       )
     : [];
 
+  const getRoleIcon = (role) => {
+    const icons = {
+      BATSMAN: "🏏",
+      BOWLER: "⚡",
+      ALL_ROUNDER: "🌟",
+      WICKET_KEEPER: "🧤",
+    };
+    return icons[role] || "🏏";
+  };
+
+  const getRoleColor = (role) => {
+    const colors = {
+      BATSMAN: "from-orange-500 to-red-500",
+      BOWLER: "from-blue-500 to-purple-500",
+      ALL_ROUNDER: "from-green-500 to-teal-500",
+      WICKET_KEEPER: "from-pink-500 to-purple-500",
+    };
+    return colors[role] || "from-blue-500 to-purple-500";
+  };
+
+  const getPlayerInitials = (name) => {
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
@@ -177,33 +207,92 @@ const Auction = () => {
           <div className="lg:col-span-2 space-y-6">
             {/* Current Player */}
             {currentPlayer ? (
-              <div className="relative overflow-hidden bg-gradient-to-br from-gray-800/90 to-gray-900/90 glass-effect rounded-2xl p-8 border-2 border-blue-500/50 shadow-2xl animate-scaleIn">
+              <div className="relative overflow-hidden bg-gradient-to-br from-gray-800/90 to-gray-900/90 glass-effect rounded-2xl border-2 border-blue-500/50 shadow-2xl animate-scaleIn">
                 {/* Decorative gradient orbs */}
                 <div className="absolute top-0 right-0 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl -z-10"></div>
                 <div className="absolute bottom-0 left-0 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl -z-10"></div>
 
-                <div className="text-center mb-8">
-                  <div className="inline-block px-4 py-2 bg-gradient-to-r from-blue-500/20 to-purple-500/20 border border-blue-500/30 rounded-full mb-4">
-                    <p className="text-sm text-blue-300 font-semibold">
-                      NOW ON SALE
-                    </p>
+                {/* Player Card Section - Similar to IPL style */}
+                <div
+                  className={`relative bg-gradient-to-br ${getRoleColor(currentPlayer.role)} p-8`}
+                >
+                  {/* Decorative circles for player section */}
+                  <div className="absolute inset-0 opacity-20">
+                    <div className="absolute top-0 right-0 w-48 h-48 bg-white rounded-full blur-3xl"></div>
+                    <div className="absolute bottom-0 left-0 w-56 h-56 bg-white rounded-full blur-3xl"></div>
                   </div>
-                  <h2 className="text-5xl font-bold gradient-text mb-3 animate-slideIn">
-                    {currentPlayer.name}
-                  </h2>
-                  <p className="text-2xl text-gray-300 mb-2">
-                    {currentPlayer.role}
-                  </p>
-                  <p className="text-sm text-gray-400">
-                    Base Price:{" "}
-                    <span className="text-gray-300 font-semibold">
-                      ₹{currentPlayer.basePrice} Cr
-                    </span>
-                  </p>
+
+                  {/* NOW ON SALE badge */}
+                  <div className="flex justify-center mb-6">
+                    <div className="px-6 py-2 bg-white/20 backdrop-blur-md border border-white/30 rounded-full">
+                      <p className="text-sm text-white font-bold tracking-wider">
+                        🔴 NOW ON SALE
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Player Avatar and Name */}
+                  <div className="flex flex-col items-center mb-6">
+                    {/* Avatar */}
+                    <div className="relative mb-6">
+                      <div className="w-40 h-40 rounded-full bg-white/10 backdrop-blur-md border-4 border-white/30 flex items-center justify-center shadow-2xl">
+                        <UserIcon
+                          className="w-20 h-20 text-white/30"
+                          strokeWidth={1.5}
+                        />
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <span className="text-5xl font-bold text-white drop-shadow-lg">
+                            {getPlayerInitials(currentPlayer.name)}
+                          </span>
+                        </div>
+                      </div>
+                      {/* Role icon badge */}
+                      <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2">
+                        <div className="px-4 py-1.5 bg-white/20 backdrop-blur-md rounded-full border-2 border-white/40">
+                          <span className="text-2xl">
+                            {getRoleIcon(currentPlayer.role)}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Player Name */}
+                    <h2 className="text-5xl font-bold text-white text-center mb-3 drop-shadow-lg">
+                      {currentPlayer.name}
+                    </h2>
+
+                    {/* Role */}
+                    <div className="px-6 py-2 bg-white/20 backdrop-blur-md border border-white/30 rounded-full mb-4">
+                      <p className="text-xl text-white font-semibold flex items-center gap-2">
+                        <span>{getRoleIcon(currentPlayer.role)}</span>
+                        {currentPlayer.role.replace("_", " ")}
+                      </p>
+                    </div>
+
+                    {/* Base Price */}
+                    <div className="text-center">
+                      <p className="text-sm text-white/70 mb-1">BASE PRICE</p>
+                      <p className="text-2xl font-bold text-white">
+                        ₹{currentPlayer.basePrice} Cr
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* IPL Style Bottom Banner */}
+                  <div className="bg-white/10 backdrop-blur-md border-t border-white/20 -mx-8 -mb-8 px-8 py-4">
+                    <div className="flex items-center justify-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
+                        <span className="text-white font-bold">M</span>
+                      </div>
+                      <span className="text-white text-sm font-bold tracking-wider">
+                        MOCK IPL AUCTION 2026
+                      </span>
+                    </div>
+                  </div>
                 </div>
 
                 {/* Current Bid */}
-                <div className="bg-gradient-to-br from-green-500/10 to-emerald-500/10 border border-green-500/30 rounded-2xl p-8 mb-6 hover-lift">
+                <div className="bg-gradient-to-br from-green-500/10 to-emerald-500/10 border border-green-500/30 p-8 hover-lift">
                   <div className="text-center">
                     <div className="flex items-center justify-center gap-3 mb-3">
                       <Gavel className="w-6 h-6 text-green-400" />
