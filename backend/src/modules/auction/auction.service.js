@@ -17,6 +17,7 @@ import { getMinimumIncrement } from "./priceLadder.js";
 import { startTimer } from "./timer.engine.js";
 import prisma from "../../config/database.js";
 import { io } from "../../server.js";
+import { createBid } from "../bid/bid.repo.js";
 
 export const placeBidService = async (userId, roomId, amount) => {
   const room = await findRoomById(roomId);
@@ -66,6 +67,10 @@ export const placeBidService = async (userId, roomId, amount) => {
     currentPrice = player.basePrice;
   }
 
+  if (amount <= currentPrice) {
+    throw new AppError("Bid too low (race condition)", 400);
+  }
+
   const minIncrement = getMinimumIncrement(currentPrice);
 
   // If first bid, allow basePrice
@@ -89,6 +94,13 @@ export const placeBidService = async (userId, roomId, amount) => {
   // ) {
   //   throw new AppError("You already placed this bid", 400);
   // }
+
+  await createBid({
+    roomId,
+    playerId: room.currentPlayerId,
+    teamId: team.id,
+    amount,
+  });
 
   // Update in-memory state
   currentState.highestBid = amount;
@@ -138,7 +150,7 @@ export const closeCurrentPlayerService = async (userId, roomId) => {
     throw new AppError("Auction state missing", 500);
   }
 
-  return prisma.$transaction(async (tx) => {
+  const result = await prisma.$transaction(async (tx) => {
     const player = await findPlayerById(room.currentPlayerId, tx);
 
     if (!player || player.status !== "ACTIVE") {
@@ -158,6 +170,10 @@ export const closeCurrentPlayerService = async (userId, roomId) => {
       const team = await findTeamById(state.highestBidder, tx);
 
       if (!team) throw new AppError("Winning team not found", 500);
+
+      // Revalidate budget inside transaction
+      if (team.budget < state.highestBid)
+        throw new AppError("Insufficient budget during close", 400);
 
       await updatePlayer(
         player.id,
@@ -202,22 +218,19 @@ export const closeCurrentPlayerService = async (userId, roomId) => {
         tx,
       );
 
-      io.to(roomId).emit("nextPlayer", {
-        playerId: nextPlayer.id,
-      });
-
+      // Reset in-memory state
       state.highestBid = 0;
       state.highestBidder = null;
 
-      // Start timer for next player
-      startTimer(roomId, room.hostId);
-
       return {
-        message: "Moved to next player",
+        type: "NEXT",
         nextPlayerId: nextPlayer.id,
       };
     }
 
+    // ======================
+    // AUCTION COMPLETED
+    // ======================
     await updateRoom(
       roomId,
       {
@@ -229,13 +242,29 @@ export const closeCurrentPlayerService = async (userId, roomId) => {
       tx,
     );
 
-    // Clear timer if exists
-    if (state.timer) {
-      clearTimeout(state.timer);
-    }
-
-    delete auctionState[roomId];
-
-    return { message: "Auction completed" };
+    return { type: "COMPLETED" };
   });
+
+  if (result.type === "NEXT") {
+    io.to(roomId).emit("nextPlayer", {
+      playerId: result.nextPlayerId,
+    });
+
+    startTimer(roomId, room.hostId);
+
+    return {
+      message: "Moved to next player",
+      nextPlayerId: result.nextPlayerId,
+    };
+  }
+
+  // Auction completed, clean up state
+  if (state.timer) clearTimeout(state.timer);
+  if (state.interval) clearInterval(state.interval);
+
+  delete auctionState[roomId];
+
+  io.to(roomId).emit("auctionCompleted");
+
+  return { message: "Auction completed" };
 };
