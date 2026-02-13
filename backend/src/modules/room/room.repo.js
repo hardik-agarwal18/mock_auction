@@ -56,3 +56,37 @@ export const findTeamById = (teamId, tx) => {
     where: { id: teamId },
   });
 };
+
+export const findMostExpensivePlayer = (roomId, tx) => {
+  return (tx || prisma).roomPlayer.findFirst({
+    where: {
+      roomId,
+      status: "SOLD",
+    },
+    orderBy: {
+      soldPrice: "desc",
+    },
+  });
+};
+
+export const getTotalAuctionValue = (roomId, tx) => {
+  return (tx || prisma).roomPlayer.aggregate({
+    where: {
+      roomId,
+      status: "SOLD",
+    },
+    _sum: {
+      soldPrice: true,
+    },
+  });
+};
+
+export const findTeamsByRoom = (roomId, tx) => {
+  return (tx || prisma).team.findMany({
+    where: { roomId },
+    include: {
+      teamPlayers: true,
+      bids: true,
+    },
+  });
+};

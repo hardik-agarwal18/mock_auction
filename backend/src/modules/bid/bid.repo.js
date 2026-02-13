@@ -62,3 +62,9 @@ export const findHighestBidInRoom = (roomId, tx) => {
     orderBy: { amount: "desc" },
   });
 };
+
+export const countBidsByRoom = (roomId, tx) => {
+  return (tx || prisma).bid.count({
+    where: { roomId },
+  });
+};
