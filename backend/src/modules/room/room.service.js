@@ -94,6 +94,7 @@ export const startRoomService = async (userId, roomId) => {
     highestBid: 0,
     highestBidder: null,
     timer: null,
+    interval: null,
     timeoutAt: null,
   };
 
