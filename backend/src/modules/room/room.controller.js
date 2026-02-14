@@ -1,6 +1,7 @@
 import {
   createRoomService,
   joinRoomService,
+  getRoomService,
   startRoomService,
 } from "./room.service.js";
 

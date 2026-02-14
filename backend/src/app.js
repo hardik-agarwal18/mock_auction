@@ -6,11 +6,13 @@ import playerRoutes from "./modules/player/player.routes.js";
 import auctionRoutes from "./modules/auction/auction.routes.js";
 import bidRoutes from "./modules/bid/bid.routes.js";
 import errorMiddleware from "./shared/middleware/error.middleware.js";
+import cors from "cors";
 
 const app = express();
 
 app.use(express.json());
 app.use(morgan("dev"));
+app.use(cors({ origin: "*" }));
 
 app.use("/api/auth", authRoutes);
 app.use("/api/rooms", roomRoutes);

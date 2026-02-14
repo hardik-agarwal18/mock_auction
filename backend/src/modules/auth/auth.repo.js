@@ -17,3 +17,17 @@ export const findUserById = (id) => {
     where: { id },
   });
 };
+
+export const findUserByUsername = (username) => {
+  return prisma.user.findUnique({
+    where: { username },
+  });
+};
+
+export const findUserByEmailOrUsername = (identifier) => {
+  return prisma.user.findFirst({
+    where: {
+      OR: [{ email: identifier }, { username: identifier }],
+    },
+  });
+};

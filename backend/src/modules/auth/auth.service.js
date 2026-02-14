@@ -2,13 +2,25 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import AppError from "../../shared/errors/AppError.js";
 import { JWT_SECRET } from "../../config/env.js";
-import { findUserByEmail, createUser, findUserById } from "./auth.repo.js";
+import {
+  findUserByEmail,
+  createUser,
+  findUserById,
+  findUserByUsername,
+  findUserByEmailOrUsername,
+} from "./auth.repo.js";
 
 export const registerUser = async ({ email, password, username }) => {
-  const existing = await findUserByEmail(email);
+  const existingEmail = await findUserByEmail(email);
 
-  if (existing) {
-    throw new AppError("User already exists", 400);
+  if (existingEmail) {
+    throw new AppError("Email already registered", 400);
+  }
+
+  const existingUsername = await findUserByUsername(username);
+
+  if (existingUsername) {
+    throw new AppError("Username already taken", 400);
   }
 
   const hashed = await bcrypt.hash(password, 10);
@@ -21,7 +33,8 @@ export const registerUser = async ({ email, password, username }) => {
 };
 
 export const loginUser = async ({ email, password }) => {
-  const user = await findUserByEmail(email);
+  // Accept email or username for login
+  const user = await findUserByEmailOrUsername(email);
 
   if (!user) {
     throw new AppError("Invalid credentials", 401);
