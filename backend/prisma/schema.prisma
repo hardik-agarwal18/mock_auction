@@ -65,6 +65,7 @@ model RoomPlayer {
 
   room        AuctionRoom  @relation(fields: [roomId], references: [id])
   teamPlayers TeamPlayer[]
+  stats       PlayerStats?
 
   createdAt DateTime @default(now())
   bids      Bid[]
@@ -109,5 +110,38 @@ model Bid {
 
   @@index([roomId])
   @@index([teamId])
+  @@index([playerId])
+}
+
+model PlayerStats {
+  id       String @id @default(uuid())
+  playerId String @unique
+
+  // Batting stats
+  matchesPlayed  Int?
+  innings        Int?
+  runs           Int?
+  highestScore   Int?
+  battingAverage Float?
+  strikeRate     Float?
+  centuries      Int?
+  halfCenturies  Int?
+
+  // Bowling stats
+  wickets        Int?
+  bowlingAverage Float?
+  economyRate    Float?
+  bestBowling    String?
+  fiveWickets    Int?
+
+  // Fielding stats
+  catches Int?
+  runOuts Int?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  player RoomPlayer @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
   @@index([playerId])
 }
